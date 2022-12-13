@@ -1,5 +1,6 @@
 #include <PN5180.h>
 #include <PN5180ISO15693.h>
+//#include <PN5180ISO14443.h>
 
 #define PN5180_NSS  10
 #define PN5180_BUSY 9
@@ -7,13 +8,15 @@
 
 PN5180ISO15693 nfc(PN5180_NSS, PN5180_BUSY, PN5180_RST);
 
+bool errorFlag = false;
+uint32_t loopCnt = 0;
+
 void setup() {
   Serial.begin(115200);
   nfc.begin();
   nfc.reset();
 
-  uint32_t loopCnt = 0;
-  bool errorFlag = false;
+
 }
 void loop() {
   if (errorFlag) {
@@ -21,21 +24,25 @@ void loop() {
     showIRQStatus(irqStatus);
 
     if (0 == (RX_SOF_DET_IRQ_STAT & irqStatus)) { // no card detected
-      Serial.println(F("*** No card detected!"));
+      //Serial.println(F("*** No card detected!"));
     }
     nfc.reset();
     nfc.setupRF();
     errorFlag = false;
   }
-  Serial.println(F("----------------------------------"));
-  Serial.print(F("Loop #"));
-  Serial.println(loopCnt++);
-  delay(1000);
+  //Serial.print(F("Loop #"));
+  //Serial.println(loopCnt++);
+  delay(10);
   uint8_t uid[8];
+  //Serial.print(F("Call GetInv"));
   ISO15693ErrorCode rc = nfc.getInventory(uid);
+  //ISO14443ErrorCode rc = nfc.getInventory(uid);
+
+  //Serial.print(F("Ret GetInv"));
+
   if (ISO15693_EC_OK != rc) {
-    Serial.print(F("Error in getInventory: "));
-    Serial.println(nfc.strerror(rc));
+    //Serial.print(F("Error in getInventory: "));
+    //Serial.println(nfc.strerror(rc));
     errorFlag = true;
     return;
   }
