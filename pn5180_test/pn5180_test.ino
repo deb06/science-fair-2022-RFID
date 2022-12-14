@@ -10,15 +10,23 @@ PN5180ISO15693 nfc(PN5180_NSS, PN5180_BUSY, PN5180_RST);
 
 bool errorFlag = false;
 uint32_t loopCnt = 0;
+uint8_t goodReadCount = 0;
 
 void setup() {
   Serial.begin(115200);
   nfc.begin();
   nfc.reset();
-
-
 }
+
 void loop() {
+  if (loopCnt > 100) {
+  Serial.println("===============================================");
+  Serial.print(goodReadCount);
+  Serial.println(" out of 100");
+  Serial.println("===============================================");
+    while(1) { 
+  }
+  }
   if (errorFlag) {
     uint32_t irqStatus = nfc.getIRQStatus();
     showIRQStatus(irqStatus);
@@ -31,7 +39,7 @@ void loop() {
     errorFlag = false;
   }
   //Serial.print(F("Loop #"));
-  //Serial.println(loopCnt++);
+  loopCnt++;
   delay(10);
   uint8_t uid[8];
   //Serial.print(F("Call GetInv"));
@@ -47,11 +55,13 @@ void loop() {
     return;
   }
   Serial.print(F("Inventory successful, UID="));
+  goodReadCount++;
   for (int i=0; i<8; i++) {
     Serial.print(uid[7-i], HEX); // LSB is first
     if (i < 2) Serial.print(":");
   }
   Serial.println();
+  
 }
 
 void showIRQStatus(uint32_t irqStatus) {
